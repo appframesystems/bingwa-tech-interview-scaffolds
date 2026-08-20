@@ -1,0 +1,119 @@
+### ============================================
+### Task API Test File
+### Works with REST Client VS Code extension
+### ============================================
+
+### Variables
+@baseUrl = http://localhost:3000
+@taskId = 1
+
+### ============================================
+### 1. CREATE A NEW TASK
+### ============================================
+POST {{baseUrl}}/tasks
+Content-Type: application/json
+
+{
+  "title": "Complete the NestJS backend"
+}
+
+###
+
+### ============================================
+### 2. CREATE ANOTHER TASK
+### ============================================
+POST {{baseUrl}}/tasks
+Content-Type: application/json
+
+{
+  "title": "Write API documentation"
+}
+
+###
+
+### ============================================
+### 3. CREATE TASK WITH LONG TITLE
+### ============================================
+POST {{baseUrl}}/tasks
+Content-Type: application/json
+
+{
+  "title": "This is a very long task title that might exceed the character limit if we set one"
+}
+
+###
+
+### ============================================
+### 4. CREATE TASK - MISSING TITLE (Should fail)
+### ============================================
+POST {{baseUrl}}/tasks
+Content-Type: application/json
+
+{
+  "title": ""
+}
+
+###
+
+### ============================================
+### 5. CREATE TASK - EMPTY BODY (Should fail)
+### ============================================
+POST {{baseUrl}}/tasks
+Content-Type: application/json
+
+{}
+
+###
+
+### ============================================
+### 6. MARK TASK AS COMPLETE
+### (Replace 1 with your actual task ID)
+### ============================================
+PATCH {{baseUrl}}/tasks/1/complete
+
+###
+
+### ============================================
+### 7. MARK ANOTHER TASK AS COMPLETE
+### ============================================
+PATCH {{baseUrl}}/tasks/2/complete
+
+###
+
+### ============================================
+### 8. MARK TASK - INVALID ID (Should fail - 404)
+### ============================================
+PATCH {{baseUrl}}/tasks/999/complete
+
+###
+
+### ============================================
+### 9. GET ALL TASKS (If you added this endpoint)
+### ============================================
+GET {{baseUrl}}/tasks
+
+###
+
+### ============================================
+### 10. GET A SPECIFIC TASK (If you added this endpoint)
+### ============================================
+GET {{baseUrl}}/tasks/1
+
+###
+
+### ============================================
+### 11. COMPLETE FLOW TEST - Create and Complete
+### ============================================
+### Step 1: Create a task
+POST {{baseUrl}}/tasks
+Content-Type: application/json
+
+{
+  "title": "Test task for complete flow"
+}
+
+### Store the task ID from response
+### Step 2: Mark it complete
+PATCH {{baseUrl}}/tasks/1/complete
+
+###
