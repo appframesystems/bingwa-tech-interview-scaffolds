@@ -1,183 +1,119 @@
-### Tasks API Testing (All endpoints are protected)
-@baseUrl = http://localhost:3000/api
+### ============================================
+### Task API Test File
+### Works with REST Client VS Code extension
+### ============================================
 
-### First, login to get token
-POST {{baseUrl}}/auth/login
-Content-Type: application/json
-
-{
-  "email": "john@example.com",
-  "password": "SecurePass123!"
-}
-
-### Save the accessToken from response
-### @accessToken = YOUR_JWT_TOKEN
-
-###
+### Variables
+@baseUrl = http://localhost:3000
+@taskId = 1
 
 ### ============================================
-### 1. Create a task
+### 1. CREATE A NEW TASK
 ### ============================================
 POST {{baseUrl}}/tasks
-Authorization: Bearer YOUR_JWT_TOKEN
 Content-Type: application/json
 
 {
-  "title": "Build the complete API",
-  "description": "Create full CRUD operations for tasks",
-  "priority": "HIGH"
+  "title": "Complete the NestJS backend"
 }
 
 ###
 
 ### ============================================
-### 2. Create another task
+### 2. CREATE ANOTHER TASK
 ### ============================================
 POST {{baseUrl}}/tasks
-Authorization: Bearer YOUR_JWT_TOKEN
 Content-Type: application/json
 
 {
-  "title": "Write API documentation",
-  "description": "Document all endpoints with examples",
-  "priority": "MEDIUM",
-  "status": "TODO"
+  "title": "Write API documentation"
 }
 
 ###
 
 ### ============================================
-### 3. Create a task with due date
+### 3. CREATE TASK WITH LONG TITLE
 ### ============================================
 POST {{baseUrl}}/tasks
-Authorization: Bearer YOUR_JWT_TOKEN
 Content-Type: application/json
 
 {
-  "title": "Test the API with Flutter",
-  "description": "Integrate backend with Flutter frontend",
-  "priority": "HIGH",
-  "status": "IN_PROGRESS",
-  "dueDate": "2026-09-01"
+  "title": "This is a very long task title that might exceed the character limit if we set one"
 }
 
 ###
 
 ### ============================================
-### 4. Get all tasks with pagination
+### 4. CREATE TASK - MISSING TITLE (Should fail)
 ### ============================================
-GET {{baseUrl}}/tasks?page=1&limit=10
-Authorization: Bearer YOUR_JWT_TOKEN
-
-###
-
-### ============================================
-### 5. Get tasks with status filter
-### ============================================
-GET {{baseUrl}}/tasks?status=COMPLETED
-Authorization: Bearer YOUR_JWT_TOKEN
-
-###
-
-### ============================================
-### 6. Get tasks with priority filter
-### ============================================
-GET {{baseUrl}}/tasks?priority=HIGH
-Authorization: Bearer YOUR_JWT_TOKEN
-
-###
-
-### ============================================
-### 7. Get tasks with search
-### ============================================
-GET {{baseUrl}}/tasks?search=API
-Authorization: Bearer YOUR_JWT_TOKEN
-
-###
-
-### ============================================
-### 8. Get task statistics
-### ============================================
-GET {{baseUrl}}/tasks/stats/dashboard
-Authorization: Bearer YOUR_JWT_TOKEN
-
-###
-
-### ============================================
-### 9. Get tasks by status
-### ============================================
-GET {{baseUrl}}/tasks/status/TODO
-Authorization: Bearer YOUR_JWT_TOKEN
-
-###
-
-### ============================================
-### 10. Get a single task by ID
-### ============================================
-GET {{baseUrl}}/tasks/TASK_ID
-Authorization: Bearer YOUR_JWT_TOKEN
-
-###
-
-### ============================================
-### 11. Update a task
-### ============================================
-PATCH {{baseUrl}}/tasks/TASK_ID
-Authorization: Bearer YOUR_JWT_TOKEN
+POST {{baseUrl}}/tasks
 Content-Type: application/json
 
 {
-  "title": "Updated task title",
-  "priority": "LOW",
-  "status": "IN_PROGRESS"
+  "title": ""
 }
 
 ###
 
 ### ============================================
-### 12. Mark task as complete
+### 5. CREATE TASK - EMPTY BODY (Should fail)
 ### ============================================
-PATCH {{baseUrl}}/tasks/TASK_ID/complete
-Authorization: Bearer YOUR_JWT_TOKEN
+POST {{baseUrl}}/tasks
+Content-Type: application/json
+
+{}
 
 ###
 
 ### ============================================
-### 13. Batch update tasks
+### 6. MARK TASK AS COMPLETE
+### (Replace 1 with your actual task ID)
 ### ============================================
-POST {{baseUrl}}/tasks/batch
-Authorization: Bearer YOUR_JWT_TOKEN
+PATCH {{baseUrl}}/tasks/1/complete
+
+###
+
+### ============================================
+### 7. MARK ANOTHER TASK AS COMPLETE
+### ============================================
+PATCH {{baseUrl}}/tasks/2/complete
+
+###
+
+### ============================================
+### 8. MARK TASK - INVALID ID (Should fail - 404)
+### ============================================
+PATCH {{baseUrl}}/tasks/999/complete
+
+###
+
+### ============================================
+### 9. GET ALL TASKS (If you added this endpoint)
+### ============================================
+GET {{baseUrl}}/tasks
+
+###
+
+### ============================================
+### 10. GET A SPECIFIC TASK (If you added this endpoint)
+### ============================================
+GET {{baseUrl}}/tasks/1
+
+###
+
+### ============================================
+### 11. COMPLETE FLOW TEST - Create and Complete
+### ============================================
+### Step 1: Create a task
+POST {{baseUrl}}/tasks
 Content-Type: application/json
 
 {
-  "taskIds": ["TASK_ID_1", "TASK_ID_2"],
-  "updateData": {
-    "status": "COMPLETED"
-  }
+  "title": "Test task for complete flow"
 }
 
-###
-
-### ============================================
-### 14. Soft delete a task
-### ============================================
-DELETE {{baseUrl}}/tasks/TASK_ID
-Authorization: Bearer YOUR_JWT_TOKEN
-
-###
-
-### ============================================
-### 15. Restore a soft-deleted task
-### ============================================
-PATCH {{baseUrl}}/tasks/TASK_ID/restore
-Authorization: Bearer YOUR_JWT_TOKEN
-
-###
-
-### ============================================
-### 16. Hard delete a task (permanent)
-### ============================================
-DELETE {{baseUrl}}/tasks/TASK_ID/hard
-Authorization: Bearer YOUR_JWT_TOKEN
+### Store the task ID from response
+### Step 2: Mark it complete
+PATCH {{baseUrl}}/tasks/1/complete
 
 ###
