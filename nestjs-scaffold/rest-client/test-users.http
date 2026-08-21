@@ -1,0 +1,71 @@
+### User API Testing
+@baseUrl = http://localhost:3000/api
+
+### 1. Create a new user
+POST {{baseUrl}}/users
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "SecurePass123!"
+}
+
+###
+
+### 2. Create another user
+POST {{baseUrl}}/users
+Content-Type: application/json
+
+{
+  "name": "Jane Smith",
+  "email": "jane@example.com",
+  "password": "SecurePass456!"
+}
+
+###
+
+### 3. Try to create user with duplicate email (Should fail)
+POST {{baseUrl}}/users
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "SecurePass123!"
+}
+
+###
+
+### 4. Get all users (Need JWT - will work after auth is implemented)
+GET {{baseUrl}}/users
+Authorization: Bearer YOUR_JWT_TOKEN
+
+###
+
+### 5. Get user by ID (Need JWT)
+GET {{baseUrl}}/users/USER_ID
+Authorization: Bearer YOUR_JWT_TOKEN
+
+###
+
+### 6. Update user (Need JWT)
+PATCH {{baseUrl}}/users/USER_ID
+Authorization: Bearer YOUR_JWT_TOKEN
+Content-Type: application/json
+
+{
+  "name": "John Updated"
+}
+
+###
+
+### 7. Soft delete user (Need JWT)
+DELETE {{baseUrl}}/users/USER_ID
+Authorization: Bearer YOUR_JWT_TOKEN
+
+###
+
+### 8. Get user stats (Need JWT - after auth)
+GET {{baseUrl}}/users/stats/dashboard
+Authorization: Bearer YOUR_JWT_TOKEN
