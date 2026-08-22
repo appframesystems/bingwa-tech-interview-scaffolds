@@ -95,13 +95,14 @@ class TaskScreen extends GetView<TaskController> {
   }
 
   Widget _buildAddTaskSection() {
+    final titleController = TextEditingController();
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
           Expanded(
             child: TextField(
-              onChanged: controller.setNewTaskTitle,
+              controller: titleController,
               decoration: InputDecoration(
                 hintText: 'Enter task title...',
                 border: OutlineInputBorder(
@@ -121,12 +122,22 @@ class TaskScreen extends GetView<TaskController> {
                 ),
               ),
               textInputAction: TextInputAction.done,
-              onSubmitted: (_) => controller.addTask(),
+              onSubmitted: (_) {
+                if (titleController.text.trim().isNotEmpty) {
+                  controller.addTask(title: titleController.text.trim());
+                  titleController.clear();
+                }
+              },
             ),
           ),
           const SizedBox(width: 12),
           Obx(() => ElevatedButton(
-            onPressed: controller.isLoading.value ? null : controller.addTask,
+            onPressed: controller.isLoading.value ? null : () {
+              if (titleController.text.trim().isNotEmpty) {
+                controller.addTask(title: titleController.text.trim());
+                titleController.clear();
+              }
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: Get.theme.primaryColor,
               shape: RoundedRectangleBorder(
@@ -153,22 +164,22 @@ class TaskScreen extends GetView<TaskController> {
       ),
       child: ListTile(
         leading: Checkbox(
-          value: task.completed,
-          onChanged: (_) => controller.toggleTask(task.id),
+          value: task.isComplete,
+          onChanged: (_) => controller.toggleTaskComplete(task.id),
           activeColor: Colors.green,
         ),
         title: Text(
           task.title,
           style: TextStyle(
-            decoration: task.completed ? TextDecoration.lineThrough : null,
-            color: task.completed ? Colors.grey : Colors.black87,
+            decoration: task.isComplete ? TextDecoration.lineThrough : null,
+            color: task.isComplete ? Colors.grey : Colors.black87,
           ),
         ),
         trailing: IconButton(
           icon: const Icon(Icons.delete_outline, color: Colors.red),
           onPressed: () => controller.deleteTask(task.id),
         ),
-        onTap: () => controller.toggleTask(task.id),
+        onTap: () => controller.toggleTaskComplete(task.id),
       ),
     );
   }

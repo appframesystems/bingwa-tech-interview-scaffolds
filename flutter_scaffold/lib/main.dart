@@ -1,16 +1,15 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:task_manager/presentation/bindings/app_binding.dart';
-import 'package:task_manager/presentation/routes/app_pages.dart';
-import 'package:task_manager/presentation/routes/app_routes.dart';
+import 'presentation/routes/app_pages.dart';
+import 'presentation/routes/app_routes.dart';
+import 'presentation/bindings/app_binding.dart';
 
 void main() {
-  runApp(const TaskManagerApp());
+  runApp(const MyApp());
 }
 
-class TaskManagerApp extends StatelessWidget {
-  const TaskManagerApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -19,11 +18,15 @@ class TaskManagerApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
         useMaterial3: true,
+        appBarTheme: const AppBarTheme(
+          elevation: 0,
+          centerTitle: true,
+        ),
       ),
-      initialRoute: AppRoutes.tasks,
-      getPages: AppPages.pages,
-      initialBinding: AppBinding(),
       debugShowCheckedModeBanner: false,
+      initialRoute: AppRoutes.splash,
+      initialBinding: AppBinding(),
+      getPages: AppPages.pages,
     );
   }
 }

@@ -1,10 +1,9 @@
-
 import 'package:get/get.dart';
-import 'package:task_manager/presentation/controllers/task_controller.dart';
+import '../controllers/task_controller.dart';
 
 class TaskBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut(() => TaskController());
+    Get.lazyPut<TaskController>(() => TaskController());
   }
 }

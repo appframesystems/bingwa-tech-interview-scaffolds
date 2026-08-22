@@ -1,128 +1,98 @@
-
-import 'package:dio/dio.dart';
-import 'package:get/get.dart';
-import 'package:pretty_dio_logger/pretty_dio_logger.dart';
-import 'package:task_manager/data/services/api_endpoints.dart';
-import 'package:task_manager/data/services/shared_preference.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'api_endpoints.dart';
 
 class ApiClient {
-  late final Dio dio;
-  
-  
+  final _storage = const FlutterSecureStorage();
   static const String _tokenKey = 'access_token';
-  static const String _refreshTokenKey = 'refresh_token';
-  
-  ApiClient() {
-    dio = Dio(BaseOptions(
-      baseUrl: ApiEndpoint.baseUrl,
-      connectTimeout: const Duration(seconds: 30),
-      receiveTimeout: const Duration(seconds: 30),
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-    ));
-    
-    _addInterceptors();
-    _restoreToken();
+
+  // Get headers with token
+  Future<Map<String, String>> getHeaders() async {
+    final token = await _storage.read(key: _tokenKey);
+    return {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
+    };
   }
-  
-  void _addInterceptors() {
-    _setupPrettyLogging();
-    dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (options, handler) {
-        final sharedPrefs = Get.find<SharedPreference>();
-        final token = sharedPrefs.getString(_tokenKey);
-        
-        if (token != null && token.isNotEmpty) {
-          options.headers['Authorization'] = 'Bearer $token';
-        }
-        
-        return handler.next(options);
-      },
-      onResponse: (response, handler) {
-        return handler.next(response);
-      },
-      onError: (error, handler) async {
-        if (error.response?.statusCode == 401) {
-          try {
-            final newToken = await _refreshToken();
-            if (newToken != null) {
-              final sharedPrefs = Get.find<SharedPreference>();
-              sharedPrefs.saveString(_tokenKey, newToken);
-              
-              error.requestOptions.headers['Authorization'] = 'Bearer $newToken';
-              final response = await dio.fetch(error.requestOptions);
-              return handler.resolve(response);
-            }
-          } catch (e) {
-            Get.offAllNamed('/login');
-          }
-        }
-        
-        return handler.next(error);
-      },
-    ));
+
+  // Set token
+  Future<void> setToken(String token) async {
+    await _storage.write(key: _tokenKey, value: token);
   }
-  
-  void _setupPrettyLogging() {
-    dio.interceptors.add(
-      PrettyDioLogger(
-        requestHeader: true,
-        requestBody: true,
-        responseBody: true,
-        responseHeader: false,
-        error: true,
-        compact: true,
-        maxWidth: 90,
-      ),
+
+  // Get token
+  Future<String?> getToken() async {
+    return await _storage.read(key: _tokenKey);
+  }
+
+  // Clear token
+  Future<void> clearToken() async {
+    await _storage.delete(key: _tokenKey);
+  }
+
+  // Handle response
+  dynamic handleResponse(http.Response response) {
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      if (response.body.isEmpty) return null;
+      return jsonDecode(response.body);
+    } else {
+      final error = jsonDecode(response.body);
+      throw Exception(error['message'] ?? 'Something went wrong');
+    }
+  }
+
+  // GET request
+  Future<dynamic> get(String endpoint) async {
+    final headers = await getHeaders();
+    final response = await http.get(
+      Uri.parse('${ApiEndpoints.baseUrl}$endpoint'),
+      headers: headers,
     );
+    return handleResponse(response);
   }
-  
-  void _restoreToken() {
-    try {
-      final sharedPrefs = Get.find<SharedPreference>();
-      final token = sharedPrefs.getString(_tokenKey);
-      if (token != null && token.isNotEmpty) {
-        dio.options.headers['Authorization'] = 'Bearer $token';
-      }
-    } catch (e) {
-    }
+
+  // POST request
+  Future<dynamic> post(String endpoint, {dynamic body}) async {
+    final headers = await getHeaders();
+    final response = await http.post(
+      Uri.parse('${ApiEndpoints.baseUrl}$endpoint'),
+      headers: headers,
+      body: body != null ? jsonEncode(body) : null,
+    );
+    return handleResponse(response);
   }
-  
-  Future<String?> _refreshToken() async {
-    try {
-      final sharedPrefs = Get.find<SharedPreference>();
-      final refreshToken = sharedPrefs.getString(_refreshTokenKey);
-      
-      if (refreshToken == null || refreshToken.isEmpty) {
-        return null;
-      }
-      
-      final response = await dio.post(
-        ApiEndpoint.refresh,
-        data: {'refreshToken': refreshToken},
-      );
-      
-      if (response.data['success'] == true) {
-        return response.data['data']['accessToken'];
-      }
-      return null;
-    } catch (e) {
-      return null;
-    }
+
+  // PUT request
+  Future<dynamic> put(String endpoint, {dynamic body}) async {
+    final headers = await getHeaders();
+    final response = await http.put(
+      Uri.parse('${ApiEndpoints.baseUrl}$endpoint'),
+      headers: headers,
+      body: body != null ? jsonEncode(body) : null,
+    );
+    return handleResponse(response);
   }
-  
-  void setAuthToken(String token) {
-    dio.options.headers['Authorization'] = 'Bearer $token';
-    final sharedPrefs = Get.find<SharedPreference>();
-    sharedPrefs.saveString(_tokenKey, token);
+
+  // PATCH request
+  Future<dynamic> patch(String endpoint, {dynamic body}) async {
+    final headers = await getHeaders();
+    final response = await http.patch(
+      Uri.parse('${ApiEndpoints.baseUrl}$endpoint'),
+      headers: headers,
+      body: body != null ? jsonEncode(body) : null,
+    );
+    return handleResponse(response);
   }
-  
-  void removeAuthToken() {
-    dio.options.headers.remove('Authorization');
-    final sharedPrefs = Get.find<SharedPreference>();
-    sharedPrefs.removeKey(_tokenKey);
-    sharedPrefs.removeKey(_refreshTokenKey);
+
+  // DELETE request
+  Future<dynamic> delete(String endpoint) async {
+    final headers = await getHeaders();
+    final response = await http.delete(
+      Uri.parse('${ApiEndpoints.baseUrl}$endpoint'),
+      headers: headers,
+    );
+    return handleResponse(response);
   }
 }
