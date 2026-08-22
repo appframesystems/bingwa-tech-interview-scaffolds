@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/task.dart';
-import '../services/api_service.dart';
+import 'package:task_manager/data/services/api_service.dart';
+import 'package:task_manager/models/task.dart';
 
 class TaskProvider extends ChangeNotifier {
   final ApiService _apiService = ApiService();
